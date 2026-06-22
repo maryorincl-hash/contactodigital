@@ -853,7 +853,7 @@ async function descargarChecklist(){
     const prev=el.style.left;
     el.style.left='0';
     await new Promise(r=>setTimeout(r,60));
-    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,width:816});
+    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,width:528});
     el.style.left=prev;
     const link=document.createElement('a');
     link.download='Protocolo_Cerrador_Digital_Americar.png';
@@ -871,43 +871,80 @@ async function descargarChecklist(){
   <span class="qr-close-hint">Toca fuera del QR para cerrar</span>
 </div>
 
-<!-- Tarjeta imprimible oculta — blanco, formato carta vertical -->
-<div id="printable-card" style="position:fixed;left:-9999px;top:0;width:816px;min-height:1056px;background:#fff;padding:52px 60px;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;gap:22px">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:2.5px solid #3dd9a0;padding-bottom:14px">
+<!-- Tarjeta imprimible oculta — media carta vertical -->
+<div id="printable-card" style="position:fixed;left:-9999px;top:0;width:528px;background:#fff;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;display:flex;flex-direction:column">
+  <!-- Header -->
+  <div style="background:#14177A;padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start">
     <div>
-      <p style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#3dd9a0;margin-bottom:5px;font-weight:700">Anexo · Para imprimir y tener en tu escritorio</p>
-      <h2 style="font-size:32px;font-weight:900;line-height:1.1;letter-spacing:-1px;color:#0c3828;margin:0">Protocolo Mínimo del <span style="color:#3dd9a0">Cerrador Digital</span></h2>
+      <p style="font-size:20px;font-weight:900;color:#00FF7F;margin:0;letter-spacing:-0.5px">AMERICAR</p>
+      <p style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.55);margin:3px 0 0 0">Compra de Autos · Contact Center</p>
     </div>
-    <div style="border:2px solid #0c3828;border-radius:10px;padding:9px 16px;text-align:center;flex-shrink:0">
-      <p style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#7aaa98;margin:0 0 3px 0">Evaluable en</p>
-      <p style="font-size:15px;font-weight:800;color:#0c3828;margin:0">Mystery Shopper</p>
+    <div style="text-align:right">
+      <p style="font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00FF7F;margin:0 0 3px 0">Protocolo Mínimo</p>
+      <p style="font-size:16px;font-weight:900;color:#fff;margin:0;line-height:1.15">Cerrador<br>Digital</p>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 36px;flex:1">
-    <div>
-      <p style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#e63946;margin:0 0 12px 0">📞 Contacto Inicial</p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;align-items:flex-start;gap:11px"><span style="min-width:24px;height:24px;background:#f5a623;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0c3828;flex-shrink:0">1</span><p style="font-size:13px;color:#222;line-height:1.5;margin:0"><strong style="color:#0c3828">Llamar en menos de 5 minutos</strong> desde que llega el lead a Llaima. Notificación al correo = actuar al instante.</p></div>
-        <div style="display:flex;align-items:flex-start;gap:11px"><span style="min-width:24px;height:24px;background:#f5a623;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0c3828;flex-shrink:0">2</span><p style="font-size:13px;color:#222;line-height:1.5;margin:0">Si no contesta: esperar 2 min y <strong style="color:#0c3828">volver a llamar una vez más.</strong></p></div>
-        <div style="display:flex;align-items:flex-start;gap:11px"><span style="min-width:24px;height:24px;background:#f5a623;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0c3828;flex-shrink:0">3</span><p style="font-size:13px;color:#222;line-height:1.5;margin:0">Sin respuesta: <strong style="color:#0c3828">enviar WhatsApp desde tu celular</strong> con mensaje corto que genere curiosidad.</p></div>
-        <div style="display:flex;align-items:flex-start;gap:11px"><span style="min-width:24px;height:24px;background:#f5a623;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0c3828;flex-shrink:0">4</span><p style="font-size:13px;color:#222;line-height:1.5;margin:0">En llamada: <strong style="color:#0c3828">mapear VPP, crédito y seguro.</strong> Nunca terminar sin preguntar por los intangibles.</p></div>
-        <div style="display:flex;align-items:flex-start;gap:11px"><span style="min-width:24px;height:24px;background:#f5a623;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0c3828;flex-shrink:0">5</span><p style="font-size:13px;color:#222;line-height:1.5;margin:0"><strong style="color:#0c3828">Proponer cita con día y hora fijos.</strong> Usar escasez: el usado es unidad única, la simulación vence.</p></div>
-      </div>
+  <div style="height:3px;background:linear-gradient(90deg,#00FF7F,#4a9eff,#8b5cf6)"></div>
+  <!-- Contenido -->
+  <div style="padding:10px 14px;display:flex;flex-direction:column;gap:5px;background:#fff">
+    <p style="font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#e63946;margin:0 0 3px 0">📞 Contacto Inicial</p>
+    <div style="border-left:4px solid #3dd9a0;background:#f0fdf8;border-radius:0 8px 8px 0;padding:7px 10px;display:flex;align-items:flex-start;gap:8px">
+      <span style="min-width:22px;height:22px;background:#3dd9a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#0c3828;flex-shrink:0">1</span>
+      <div><p style="font-size:11px;font-weight:800;color:#0c3828;margin:0 0 1px 0">📞 Llamar en menos de 5 minutos</p><p style="font-size:10px;color:#444;margin:0;line-height:1.4">Desde que llega el lead a Llaima. Notificación al correo = actuar al instante.</p></div>
     </div>
-    <div>
-      <p style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#3dd9a0;margin:0 0 12px 0">📋 Cita, CRM y Seguimiento</p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;align-items:flex-start;gap:11px"><span style="min-width:24px;height:24px;background:#3dd9a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0c3828;flex-shrink:0">6</span><p style="font-size:13px;color:#222;line-height:1.5;margin:0">Al cerrar la cita: <strong style="color:#0c3828">enviar invitación de calendario Outlook</strong> con recordatorio desde tu celular.</p></div>
-        <div style="display:flex;align-items:flex-start;gap:11px"><span style="min-width:24px;height:24px;background:#3dd9a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0c3828;flex-shrink:0">7</span><p style="font-size:13px;color:#222;line-height:1.5;margin:0"><strong style="color:#0c3828">Confirmar la cita 24h antes</strong> por WhatsApp. Si es cliente de segmento de valor, priorizar.</p></div>
-        <div style="display:flex;align-items:flex-start;gap:11px"><span style="min-width:24px;height:24px;background:#3dd9a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0c3828;flex-shrink:0">8</span><p style="font-size:13px;color:#222;line-height:1.5;margin:0">Sin aceptación de cita pero con cotización o tasación VPP: <strong style="color:#0c3828">registrar como Oportunidad en Llaima</strong> y gestionar desde ahí.</p></div>
-        <div style="display:flex;align-items:flex-start;gap:11px"><span style="min-width:24px;height:24px;background:#3dd9a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0c3828;flex-shrink:0">9</span><p style="font-size:13px;color:#222;line-height:1.5;margin:0">Si no llega a la cita: <strong style="color:#0c3828">reagendar dentro de 24h.</strong> No descartar sin al menos 6 intentos de contacto.</p></div>
-        <div style="display:flex;align-items:flex-start;gap:11px"><span style="min-width:24px;height:24px;background:#3dd9a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0c3828;flex-shrink:0">10</span><p style="font-size:13px;color:#222;line-height:1.5;margin:0"><strong style="color:#0c3828">Registrar todo en Llaima</strong> antes de cerrar el día: etapa, intangibles auditados y próxima acción.</p></div>
-      </div>
+    <div style="border-left:4px solid #f5a623;background:#fffbf0;border-radius:0 8px 8px 0;padding:7px 10px;display:flex;align-items:flex-start;gap:8px">
+      <span style="min-width:22px;height:22px;background:#f5a623;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#0c3828;flex-shrink:0">2</span>
+      <div><p style="font-size:11px;font-weight:800;color:#0c3828;margin:0 0 1px 0">🔁 Reintento inmediato</p><p style="font-size:10px;color:#444;margin:0;line-height:1.4">Si no contesta: esperar 2 min y volver a llamar una vez más.</p></div>
+    </div>
+    <div style="border-left:4px solid #4a9eff;background:#f0f7ff;border-radius:0 8px 8px 0;padding:7px 10px;display:flex;align-items:flex-start;gap:8px">
+      <span style="min-width:22px;height:22px;background:#4a9eff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0">3</span>
+      <div><p style="font-size:11px;font-weight:800;color:#0c3828;margin:0 0 1px 0">💬 WhatsApp de seguimiento</p><p style="font-size:10px;color:#444;margin:0;line-height:1.4">Sin respuesta: mensaje corto desde tu celular que genere curiosidad.</p></div>
+    </div>
+    <div style="border-left:4px solid #4a9eff;background:#f0f7ff;border-radius:0 8px 8px 0;padding:7px 10px;display:flex;align-items:flex-start;gap:8px">
+      <span style="min-width:22px;height:22px;background:#4a9eff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0">4</span>
+      <div><p style="font-size:11px;font-weight:800;color:#0c3828;margin:0 0 1px 0">🎯 Mapear VPP, crédito y seguro</p><p style="font-size:10px;color:#444;margin:0;line-height:1.4">En llamada: nunca terminar sin preguntar por los intangibles.</p></div>
+    </div>
+    <div style="border-left:4px solid #8b5cf6;background:#f5f0ff;border-radius:0 8px 8px 0;padding:7px 10px;display:flex;align-items:flex-start;gap:8px">
+      <span style="min-width:22px;height:22px;background:#8b5cf6;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0">5</span>
+      <div><p style="font-size:11px;font-weight:800;color:#0c3828;margin:0 0 1px 0">📅 Proponer cita con día y hora fijos</p><p style="font-size:10px;color:#444;margin:0;line-height:1.4">Usar escasez: el usado es unidad única, la simulación vence.</p></div>
+    </div>
+    <p style="font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#3dd9a0;margin:6px 0 3px 0">📋 Cita, CRM y Seguimiento</p>
+    <div style="border-left:4px solid #3dd9a0;background:#f0fdf8;border-radius:0 8px 8px 0;padding:7px 10px;display:flex;align-items:flex-start;gap:8px">
+      <span style="min-width:22px;height:22px;background:#3dd9a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#0c3828;flex-shrink:0">6</span>
+      <div><p style="font-size:11px;font-weight:800;color:#0c3828;margin:0 0 1px 0">📆 Invitación calendario Outlook</p><p style="font-size:10px;color:#444;margin:0;line-height:1.4">Al cerrar la cita: enviar con recordatorio desde tu celular.</p></div>
+    </div>
+    <div style="border-left:4px solid #f5a623;background:#fffbf0;border-radius:0 8px 8px 0;padding:7px 10px;display:flex;align-items:flex-start;gap:8px">
+      <span style="min-width:22px;height:22px;background:#f5a623;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#0c3828;flex-shrink:0">7</span>
+      <div><p style="font-size:11px;font-weight:800;color:#0c3828;margin:0 0 1px 0">✅ Confirmar cita 24h antes</p><p style="font-size:10px;color:#444;margin:0;line-height:1.4">Por WhatsApp. Si es cliente de segmento de valor, priorizar.</p></div>
+    </div>
+    <div style="border-left:4px solid #4a9eff;background:#f0f7ff;border-radius:0 8px 8px 0;padding:7px 10px;display:flex;align-items:flex-start;gap:8px">
+      <span style="min-width:22px;height:22px;background:#4a9eff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0">8</span>
+      <div><p style="font-size:11px;font-weight:800;color:#0c3828;margin:0 0 1px 0">🗂 Registrar como Oportunidad en Llaima</p><p style="font-size:10px;color:#444;margin:0;line-height:1.4">Sin cita pero con cotización o tasación VPP: registrar y gestionar.</p></div>
+    </div>
+    <div style="border-left:4px solid #8b5cf6;background:#f5f0ff;border-radius:0 8px 8px 0;padding:7px 10px;display:flex;align-items:flex-start;gap:8px">
+      <span style="min-width:22px;height:22px;background:#8b5cf6;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0">9</span>
+      <div><p style="font-size:11px;font-weight:800;color:#0c3828;margin:0 0 1px 0">🔄 Reagendar dentro de 24h</p><p style="font-size:10px;color:#444;margin:0;line-height:1.4">Si no llega a la cita. No descartar sin al menos 6 intentos de contacto.</p></div>
+    </div>
+    <div style="border-left:4px solid #3dd9a0;background:#f0fdf8;border-radius:0 8px 8px 0;padding:7px 10px;display:flex;align-items:flex-start;gap:8px">
+      <span style="min-width:22px;height:22px;background:#3dd9a0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#0c3828;flex-shrink:0">10</span>
+      <div><p style="font-size:11px;font-weight:800;color:#0c3828;margin:0 0 1px 0">📝 Registrar todo en Llaima</p><p style="font-size:10px;color:#444;margin:0;line-height:1.4">Antes de cerrar el día: etapa, intangibles auditados y próxima acción.</p></div>
     </div>
   </div>
-  <div style="border-top:2px solid #3dd9a0;padding-top:12px;display:flex;justify-content:space-between;align-items:center">
-    <p style="font-size:12.5px;color:#333;margin:0">⭐ Recuerda: <span style="color:#3dd9a0;font-weight:700">8 de cada 10 clientes que llegan al piso, compran.</span> <strong style="color:#0c3828">Tu trabajo es conseguir que lleguen.</strong></p>
-    <p style="font-size:10px;color:#7aaa98;white-space:nowrap;margin:0 0 0 14px">Americar · El Cerrador Digital · 2026</p>
+  <!-- Footer objetivo -->
+  <div style="background:#14177A;padding:13px 20px;display:flex;align-items:center;gap:12px">
+    <span style="font-size:22px;flex-shrink:0">🎯</span>
+    <div>
+      <p style="font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00FF7F;margin:0 0 2px 0">Tu único objetivo en cada contacto</p>
+      <p style="font-size:15px;font-weight:900;color:#fff;margin:0;line-height:1.2">Una cita agendada — el cliente que llega al piso, compra</p>
+    </div>
+  </div>
+  <!-- Pie -->
+  <div style="background:#0f1460;padding:5px 20px;display:flex;justify-content:space-between;align-items:center">
+    <p style="font-size:8px;color:rgba(255,255,255,.4);margin:0">Americar · El Cerrador Digital · 2026</p>
+    <div style="border:1px solid rgba(255,255,255,.25);border-radius:5px;padding:2px 9px;text-align:center">
+      <p style="font-size:6px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);margin:0 0 1px 0">Evaluable en</p>
+      <p style="font-size:9px;font-weight:800;color:#fff;margin:0">Mystery Shopper</p>
+    </div>
   </div>
 </div>
 
