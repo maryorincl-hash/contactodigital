@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel Mystery Shopper · Cerrador Digital · Americar</title>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<style>
+:root{
+  --navy:#14177A;--navy-mid:#1B1E90;--navy-dark:#0D1060;
+  --amber:#FF9F43;--teal:#00C97A;
+  --ground:#F4F7FF;--surface:#fff;
+  --txt:#14177A;--txt-body:#323875;--txt-muted:#7A88CC;
+  --border:rgba(20,23,122,0.10);--r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ground);font-family:'Segoe UI',system-ui,sans-serif;color:var(--txt-body);font-size:14px;min-height:100vh}
+.page{max-width:1080px;margin:0 auto;padding:20px 20px 48px}
+
+/* AUTH BAR */
+.auth-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;gap:12px}
+.auth-status{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}
+.auth-dot{width:9px;height:9px;border-radius:50%;background:#ccc;flex-shrink:0}
+.auth-dot.ok{background:var(--teal)}.auth-dot.err{background:#FF6060}
+.btn-ms{display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:700;color:var(--txt);font-family:inherit;transition:all .15s}
+.btn-ms:hover{border-color:var(--navy);background:var(--ground)}
+.btn-ms svg{width:18px;height:18px;flex-shrink:0}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--teal);letter-spacing:.5px}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+
+/* CONFIG */
+.cfg-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:12px}
+.cfg-title{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt-muted);margin-bottom:12px}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.cfg-field label{display:block;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-muted);margin-bottom:4px}
+.cfg-field input{width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--txt);font-family:inherit;outline:none;background:var(--ground)}
+.cfg-field input:focus{border-color:var(--amber)}
+.cfg-hint{font-size:9px;color:var(--txt-muted);margin-top:10px;line-height:1.6}
+
+/* HEADER */
+.hdr{background:var(--navy);border-radius:var(--r) var(--r) 0 0;padding:20px 28px;display:flex;justify-content:space-between;align-items:center}
+.brand-name{font-size:22px;font-weight:900;color:var(--teal);letter-spacing:-.5px}
+.brand-sub{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:3px}
+.hdr-right{text-align:right}
+.hdr-label{font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--amber)}
+.hdr-title{font-size:19px;font-weight:900;color:#fff;line-height:1.1;margin-top:2px}
+.strip{height:4px;background:linear-gradient(90deg,var(--amber),var(--navy-mid),var(--teal))}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-radius:0 0 var(--r) var(--r);overflow:hidden}
+.stat{background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:3px}
+.stat-lbl{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--txt-muted)}
+.stat-val{font-size:34px;font-weight:900;color:var(--txt);line-height:1;letter-spacing:-1.5px}
+.stat-sub{font-size:10px;color:var(--txt-muted);margin-top:2px}
+.stat-val.amber{color:var(--amber)}.stat-val.teal{color:var(--teal)}
+.stat-val.up{color:var(--teal)}.stat-val.down{color:#FF6060}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:10px;margin:18px 0 10px;flex-wrap:wrap}
+.filter-sel{border:1.5px solid var(--border);border-radius:20px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--txt-body);background:var(--surface);outline:none;font-family:inherit;cursor:pointer}
+.filter-sel:focus{border-color:var(--amber)}
+.toolbar-right{margin-left:auto;display:flex;gap:8px}
+.btn{padding:9px 20px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:all .15s}
+.btn-teal{background:var(--teal);color:var(--navy)}.btn-teal:hover{filter:brightness(1.1)}
+.btn-outline{background:transparent;color:var(--txt-body);border:1.5px solid var(--border)}.btn-outline:hover{border-color:var(--txt-muted)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead th{padding:10px 14px;text-align:left;font-size:8px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt-muted);background:var(--ground);border-bottom:1px solid var(--border);white-space:nowrap}
+thead th.amber{color:var(--amber)}.thead th.teal{color:var(--teal)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--ground)}
+tbody td{padding:12px 14px;font-size:12.5px;color:var(--txt-body);vertical-align:middle}
+.td-suc{font-weight:700;color:var(--txt)}
+.score-cell{font-size:16px;font-weight:900;text-align:center}
+.score-pre{color:var(--amber)}.score-post{color:var(--teal)}
+.delta-cell{text-align:center;font-size:13px;font-weight:700}
+.delta-pos{color:var(--teal)}.delta-neg{color:#FF6060}.delta-zero{color:var(--txt-muted)}
+.lvl{display:inline-block;padding:3px 10px;border-radius:12px;font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap}
+.lvl-critico{background:rgba(255,96,96,.1);color:#CC2020;border:1px solid rgba(255,96,96,.2)}
+.lvl-progreso{background:rgba(255,159,67,.1);color:#D07000;border:1px solid rgba(255,159,67,.2)}
+.lvl-optimo{background:rgba(0,201,122,.1);color:#00885A;border:1px solid rgba(0,201,122,.2)}
+
+/* EXPANDED ROWS */
+.exp-row{display:none}
+.exp-row.open{display:table-row}
+.exp-cell{padding:16px 20px;background:var(--ground);border-bottom:1px solid var(--border)}
+.exp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.exp-crit{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.exp-crit-num{font-size:9px;font-weight:800;color:var(--txt-muted);margin-bottom:2px}
+.exp-crit-lbl{font-size:11px;font-weight:600;color:var(--txt);margin-bottom:6px;line-height:1.3}
+.exp-votes{display:flex;gap:6px;align-items:center;font-size:10px;font-weight:700}
+.vote-pre{color:var(--amber)}.vote-post{color:var(--teal)}
+.arrow{color:var(--txt-muted);font-size:10px}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--txt-muted)}
+.empty-ico{font-size:48px;margin-bottom:12px}
+.empty-msg{font-size:14px;font-weight:600}
+.empty-sub{font-size:12px;margin-top:4px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.25);transform:translateY(100px);opacity:0;transition:all .3s;z-index:9999;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.footer{text-align:center;font-size:9px;color:var(--txt-muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- AUTH BAR -->
+  <div class="auth-bar">
+    <div class="auth-status">
+      <div class="auth-dot" id="auth-dot"></div>
+      <span id="auth-label">No iniciada sesión</span>
+      <span class="live-badge" id="live-badge" style="display:none"><div class="pulse"></div> En vivo · 60 s</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" style="font-size:12px;padding:8px 14px" onclick="fetchNow()">↻ Actualizar</button>
+      <button class="btn-ms" id="btn-signin" onclick="signIn()">
+        <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+        Iniciar sesión con Microsoft
+      </button>
+      <button class="btn-ms" id="btn-signout" onclick="signOut()" style="display:none">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="cfg-block" id="cfg-block">
+    <div class="cfg-title">⚙ Configuración Azure AD (una sola vez)</div>
+    <div class="cfg-grid">
+      <div class="cfg-field">
+        <label>Client ID</label>
+        <input id="cfg-client" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+      </div>
+      <div class="cfg-field">
+        <label>Tenant ID</label>
+        <input id="cfg-tenant" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+      </div>
+      <div class="cfg-field" style="grid-column:1/-1">
+        <label>File ID (mismo Excel OneDrive que el formulario)</label>
+        <input id="cfg-file" type="text" placeholder="01XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX">
+      </div>
+    </div>
+    <div style="margin-top:12px"><button class="btn btn-outline" style="padding:8px 18px;font-size:12px" onclick="saveCfg()">Guardar</button></div>
+    <div class="cfg-hint">Usa el mismo Client ID, Tenant ID y File ID que configuraste en el formulario Mystery Shopper.</div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div><div class="brand-name">AMERICAR</div><div class="brand-sub">Contact Center · Autos Usados</div></div>
+    <div class="hdr-right">
+      <div class="hdr-label">Seguimiento PRE / POST</div>
+      <div class="hdr-title">Panel Mystery<br>Shopper</div>
+    </div>
+  </div>
+  <div class="strip"></div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-lbl">Evaluaciones</div><div class="stat-val" id="st-total">—</div><div class="stat-sub">registros totales</div></div>
+    <div class="stat"><div class="stat-lbl">Sucursales</div><div class="stat-val" id="st-suc">—</div><div class="stat-sub">evaluadas</div></div>
+    <div class="stat"><div class="stat-lbl">Promedio PRE</div><div class="stat-val amber" id="st-pre">—</div><div class="stat-sub">de 10 puntos</div></div>
+    <div class="stat"><div class="stat-lbl">Promedio POST</div><div class="stat-val teal" id="st-post">—</div><div class="stat-sub">de 10 puntos</div></div>
+    <div class="stat"><div class="stat-lbl">Mejora media</div><div class="stat-val" id="st-delta">—</div><div class="stat-sub">puntos ganados</div></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <select class="filter-sel" id="fil-suc" onchange="render()">
+      <option value="">Todas las sucursales</option>
+    </select>
+    <select class="filter-sel" id="fil-lvl" onchange="render()">
+      <option value="">Todos los niveles POST</option>
+      <option value="optimo">Óptimo ✅</option>
+      <option value="progreso">En Formación ⚠️</option>
+      <option value="critico">Crítico ❌</option>
+    </select>
+    <div class="toolbar-right">
+      <button class="btn btn-outline" onclick="exportCSV()">📊 Exportar CSV</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="tbl-wrap" id="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Sucursal</th><th>Ejecutivo</th><th>Evaluador</th>
+          <th class="amber">PRE</th><th class="teal">POST</th>
+          <th>Δ</th><th class="teal">Nivel POST</th>
+          <th>Fecha PRE</th><th>Fecha POST</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+    <div class="empty" id="empty-state" style="display:none">
+      <div class="empty-ico">📋</div>
+      <div class="empty-msg">Sin evaluaciones aún</div>
+      <div class="empty-sub">Inicia sesión y completa el formulario Mystery Shopper</div>
+    </div>
+  </div>
+
+  <div class="footer">Americar · Panel Mystery Shopper · Cerrador Digital · 2026</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+let ROWS=[]; // [{id,suc,eje,eva,fpre,fpost,lead,pre,post,delta,s1p,s1q,s2p,s2q,sc,notas,obs,comp,at}]
+let refreshTimer=null;
+
+const CRIT_LABELS=[
+  'Llamada < 5 min','WhatsApp si no contesta','Reintento WhatsApp 2 min',
+  'Mapeo VPP/crédito/seguro','Propuesta cita concreta',
+  'Invitación Outlook','Confirmación 24h antes','Registro en Llaima',
+  'Reagendamiento no-show','Registro completo cierre'
+];
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+function saveCfg(){
+  localStorage.setItem('az_client',document.getElementById('cfg-client').value.trim());
+  localStorage.setItem('az_tenant',document.getElementById('cfg-tenant').value.trim());
+  localStorage.setItem('az_file',document.getElementById('cfg-file').value.trim());
+  toast('Configuración guardada');
+  document.getElementById('cfg-block').style.display='none';
+}
+
+// ── MSAL ──────────────────────────────────────────────────────────────────────
+let msalApp=null;
+const SCOPES=['Files.Read'];
+
+function initMsal(){
+  const clientId=localStorage.getItem('az_client')||'';
+  const tenantId=localStorage.getItem('az_tenant')||'';
+  if(!clientId||!tenantId) return false;
+  msalApp=new msal.PublicClientApplication({
+    auth:{clientId,authority:`https://login.microsoftonline.com/${tenantId}`,redirectUri:window.location.href},
+    cache:{cacheLocation:'localStorage',storeAuthStateInCookie:false}
+  });
+  return true;
+}
+
+async function signIn(){
+  if(!initMsal()){
+    toast('Completa primero la configuración','warn');
+    document.getElementById('cfg-block').style.display='block';
+    return;
+  }
+  try{
+    const r=await msalApp.loginPopup({scopes:SCOPES});
+    setAuthUI(r.account);
+    await fetchNow();
+    startAutoRefresh();
+  }catch(e){toast('Error de inicio de sesión: '+e.message,'err');}
+}
+
+function signOut(){
+  if(msalApp) msalApp.logoutPopup();
+  setAuthUI(null);
+  clearInterval(refreshTimer);
+  refreshTimer=null;
+}
+
+function setAuthUI(account){
+  const dot=document.getElementById('auth-dot');
+  const lbl=document.getElementById('auth-label');
+  const btnIn=document.getElementById('btn-signin');
+  const btnOut=document.getElementById('btn-signout');
+  const live=document.getElementById('live-badge');
+  if(account){
+    dot.className='auth-dot ok';
+    lbl.textContent='Conectado: '+account.username+' ·';
+    btnIn.style.display='none';
+    btnOut.style.display='';
+    live.style.display='flex';
+    document.getElementById('cfg-block').style.display='none';
+  }else{
+    dot.className='auth-dot err';
+    lbl.textContent='No iniciada sesión';
+    btnIn.style.display='';
+    btnOut.style.display='none';
+    live.style.display='none';
+  }
+}
+
+async function getToken(){
+  const accounts=msalApp.getAllAccounts();
+  if(!accounts.length) throw new Error('No hay sesión activa');
+  try{
+    const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});
+    return r.accessToken;
+  }catch{
+    const r=await msalApp.acquireTokenPopup({scopes:SCOPES});
+    return r.accessToken;
+  }
+}
+
+// ── FETCH FROM EXCEL ──────────────────────────────────────────────────────────
+async function fetchNow(){
+  if(!msalApp||!msalApp.getAllAccounts().length) return;
+  try{
+    const token=await getToken();
+    const fileId=localStorage.getItem('az_file')||'';
+    let url=`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/workbook/tables/Evaluaciones/rows`;
+    const rows=[];
+    while(url){
+      const res=await fetch(url,{headers:{'Authorization':'Bearer '+token}});
+      if(!res.ok){const e=await res.json();throw new Error(e.error?.message||res.status);}
+      const data=await res.json();
+      (data.value||[]).forEach(r=>{
+        const v=r.values[0];
+        rows.push({
+          id:v[0],suc:v[1],eje:v[2],eva:v[3],fpre:v[4],fpost:v[5],lead:v[6],
+          pre:+v[7],post:+v[8],delta:+v[9],
+          s1p:+v[10],s1q:+v[11],s2p:+v[12],s2q:+v[13],
+          sc:safeJson(v[14]),notas:safeJson(v[15]),obs:v[16],comp:v[17],at:v[18]
+        });
+      });
+      url=data['@odata.nextLink']||null;
+    }
+    ROWS=rows;
+    updateFilters();
+    updateStats();
+    render();
+    toast('✅ Panel actualizado — '+rows.length+' evaluación(es)');
+  }catch(e){toast('Error al leer Excel: '+e.message,'err');}
+}
+
+function safeJson(v){try{return typeof v==='string'?JSON.parse(v):v;}catch{return null;}}
+
+function startAutoRefresh(){
+  clearInterval(refreshTimer);
+  refreshTimer=setInterval(fetchNow,60000);
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function avg(arr){return arr.length?+(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(1):0;}
+function lvl(n){return n>=9?'optimo':n>=6?'progreso':'critico';}
+function lvlLabel(k){return k==='optimo'?'Óptimo ✅':k==='progreso'?'En Formación ⚠️':'Crítico ❌';}
+
+function updateStats(){
+  const t=document.getElementById('st-total');
+  const s=document.getElementById('st-suc');
+  const p=document.getElementById('st-pre');
+  const q=document.getElementById('st-post');
+  const d=document.getElementById('st-delta');
+  t.textContent=ROWS.length||'—';
+  s.textContent=new Set(ROWS.map(r=>r.suc)).size||'—';
+  p.textContent=ROWS.length?avg(ROWS.map(r=>r.pre)):'—';
+  q.textContent=ROWS.length?avg(ROWS.map(r=>r.post)):'—';
+  const avgDelta=ROWS.length?avg(ROWS.map(r=>r.delta)):null;
+  d.textContent=avgDelta!==null?(avgDelta>=0?'+':'')+avgDelta:'—';
+  d.className='stat-val '+(avgDelta>0?'up':avgDelta<0?'down':'');
+}
+
+function updateFilters(){
+  const sel=document.getElementById('fil-suc');
+  const cur=sel.value;
+  const sucs=[...new Set(ROWS.map(r=>r.suc))].sort();
+  sel.innerHTML='<option value="">Todas las sucursales</option>';
+  sucs.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+  sel.value=cur;
+}
+
+// ── RENDER TABLE ──────────────────────────────────────────────────────────────
+let expanded=new Set();
+
+function render(){
+  const filSuc=document.getElementById('fil-suc').value;
+  const filLvl=document.getElementById('fil-lvl').value;
+  const rows=ROWS.filter(r=>{
+    if(filSuc&&r.suc!==filSuc) return false;
+    if(filLvl&&lvl(r.post)!==filLvl) return false;
+    return true;
+  });
+  const tbody=document.getElementById('tbl-body');
+  const empty=document.getElementById('empty-state');
+  if(!rows.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML='';
+  rows.forEach((r,i)=>{
+    const key=r.id||i;
+    const lk=lvl(r.post);
+    const lbl=lvlLabel(lk);
+    const dClass=r.delta>0?'delta-pos':r.delta<0?'delta-neg':'delta-zero';
+    const dText=(r.delta>=0?'+':'')+r.delta;
+
+    const tr=document.createElement('tr');
+    tr.onclick=()=>{
+      const exp=document.getElementById('exp-'+key);
+      if(exp){exp.classList.toggle('open');expanded.has(key)?expanded.delete(key):expanded.add(key);}
+    };
+    tr.innerHTML=`
+      <td class="td-suc">${r.suc||'—'}</td>
+      <td>${r.eje||'—'}</td>
+      <td style="font-size:11px;color:var(--txt-muted)">${r.eva||'—'}</td>
+      <td class="score-cell score-pre">${r.pre}</td>
+      <td class="score-cell score-post">${r.post}</td>
+      <td class="delta-cell ${dClass}">${dText}</td>
+      <td><span class="lvl lvl-${lk}">${lbl}</span></td>
+      <td style="font-size:11px;color:var(--txt-muted)">${r.fpre||'—'}</td>
+      <td style="font-size:11px;color:var(--txt-muted)">${r.fpost||'—'}</td>`;
+    tbody.appendChild(tr);
+
+    // Expanded row with per-criterion breakdown
+    const expTr=document.createElement('tr');
+    expTr.className='exp-row'+(expanded.has(key)?' open':'');
+    expTr.id='exp-'+key;
+    const scObj=r.sc||{};
+    const notasArr=r.notas||[];
+    let critHtml='';
+    for(let c=1;c<=10;c++){
+      const pre=scObj[c]?.pre;const post=scObj[c]?.post;
+      const vPre=pre===1?'✅':pre===0?'❌':'—';
+      const vPost=post===1?'✅':post===0?'❌':'—';
+      critHtml+=`<div class="exp-crit">
+        <div class="exp-crit-num">Crit. ${c}</div>
+        <div class="exp-crit-lbl">${CRIT_LABELS[c-1]}</div>
+        <div class="exp-votes">
+          <span class="vote-pre">PRE ${vPre}</span>
+          <span class="arrow">→</span>
+          <span class="vote-post">POST ${vPost}</span>
+        </div>
+        ${notasArr[c-1]?`<div style="font-size:9px;color:var(--txt-muted);margin-top:4px">${notasArr[c-1]}</div>`:''}
+      </div>`;
+    }
+    expTr.innerHTML=`<td colspan="9" class="exp-cell">
+      <div class="exp-grid">${critHtml}</div>
+      ${r.obs?`<div style="font-size:11px;color:var(--txt-muted);margin-bottom:4px"><strong>Observaciones:</strong> ${r.obs}</div>`:''}
+      ${r.comp?`<div style="font-size:11px;color:var(--txt-muted)"><strong>Compromisos:</strong> ${r.comp}</div>`:''}
+    </td>`;
+    tbody.appendChild(expTr);
+  });
+}
+
+// ── EXPORT CSV ────────────────────────────────────────────────────────────────
+function exportCSV(){
+  if(!ROWS.length){toast('No hay datos para exportar','warn');return;}
+  const headers=['RecordID','Sucursal','Ejecutivo','Evaluador','FechaPRE','FechaPOST','Lead',
+    'PRE','POST','Delta','S1_PRE','S1_POST','S2_PRE','S2_POST','Observaciones','Compromisos','GuardadoEn'];
+  const esc=v=>'"'+(v||'').toString().replace(/"/g,'""')+'"';
+  const lines=[headers.map(esc).join(',')];
+  ROWS.forEach(r=>lines.push([
+    r.id,r.suc,r.eje,r.eva,r.fpre,r.fpost,r.lead,
+    r.pre,r.post,r.delta,r.s1p,r.s1q,r.s2p,r.s2q,
+    r.obs,r.comp,r.at
+  ].map(esc).join(',')));
+  const blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='mystery_shopper.csv';a.click();
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg,type){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.style.background=type==='err'?'#8B0000':type==='warn'?'#7D5000':'#14177A';
+  el.className='toast show';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),3500);
+}
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  const clientId=localStorage.getItem('az_client')||'';
+  const tenantId=localStorage.getItem('az_tenant')||'';
+  const fileId=localStorage.getItem('az_file')||'';
+  if(clientId) document.getElementById('cfg-client').value=clientId;
+  if(tenantId) document.getElementById('cfg-tenant').value=tenantId;
+  if(fileId) document.getElementById('cfg-file').value=fileId;
+  if(clientId&&tenantId&&fileId) document.getElementById('cfg-block').style.display='none';
+
+  if(initMsal()){
+    const accounts=msalApp.getAllAccounts();
+    if(accounts.length){setAuthUI(accounts[0]);fetchNow();startAutoRefresh();}
+  }
+  render();
+});
+</script>
+</body>
+</html>

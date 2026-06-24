@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mystery Shopper · Cerrador Digital · Americar</title>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<style>
+:root{
+  --navy:#14177A;--navy-mid:#1B1E90;
+  --amber:#FF9F43;--amber-col:rgba(255,159,67,0.06);
+  --teal:#00C97A;--teal-col:rgba(0,201,122,0.06);
+  --ground:#F4F7FF;--surface:#fff;
+  --txt:#14177A;--txt-body:#323875;--txt-muted:#7A88CC;
+  --border:rgba(20,23,122,0.10);--r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ground);font-family:'Segoe UI',system-ui,sans-serif;color:var(--txt-body);font-size:14px;min-height:100vh}
+.page{max-width:920px;margin:0 auto;padding:20px 20px 48px}
+
+/* AUTH BAR */
+.auth-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;gap:12px}
+.auth-status{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}
+.auth-dot{width:9px;height:9px;border-radius:50%;background:#ccc;flex-shrink:0}
+.auth-dot.ok{background:var(--teal)}
+.auth-dot.err{background:#FF6060}
+.btn-ms{display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:700;color:var(--txt);font-family:inherit;transition:all .15s}
+.btn-ms:hover{border-color:var(--navy);background:var(--ground)}
+.btn-ms svg{width:18px;height:18px;flex-shrink:0}
+
+/* CONFIG (solo se muestra si no hay credenciales) */
+.cfg-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:12px}
+.cfg-title{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt-muted);margin-bottom:12px}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.cfg-field label{display:block;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-muted);margin-bottom:4px}
+.cfg-field input{width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--txt);font-family:inherit;outline:none;background:var(--ground)}
+.cfg-field input:focus{border-color:var(--amber)}
+.cfg-hint{font-size:9px;color:var(--txt-muted);margin-top:10px;line-height:1.6}
+.cfg-hint a{color:var(--navy);font-weight:700}
+
+/* HEADER */
+.hdr{background:var(--navy);border-radius:var(--r) var(--r) 0 0;padding:20px 28px;display:flex;justify-content:space-between;align-items:center}
+.brand-name{font-size:22px;font-weight:900;color:var(--teal);letter-spacing:-.5px}
+.brand-sub{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:3px}
+.hdr-right{text-align:right}
+.hdr-label{font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--amber)}
+.hdr-title{font-size:19px;font-weight:900;color:#fff;line-height:1.1;margin-top:2px}
+.strip{height:4px;background:linear-gradient(90deg,var(--amber),var(--navy-mid),var(--teal))}
+
+/* META */
+.meta{background:var(--surface);border:1px solid var(--border);border-top:none;padding:16px 28px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 28px}
+.meta-f label{display:block;font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--txt-muted);margin-bottom:5px}
+.meta-f input{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;color:var(--txt);font-size:13px;font-weight:600;padding:3px 0;outline:none;font-family:inherit;transition:border-color .15s}
+.meta-f input:focus{border-bottom-color:var(--amber)}
+
+/* SCORE BAR */
+.score-bar{background:var(--navy);padding:18px 28px;display:flex;align-items:center;gap:0}
+.sc-block{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:80px}
+.sc-lbl{font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase}
+.sc-num{font-size:44px;font-weight:900;line-height:1;letter-spacing:-2px}
+.sc-of{font-size:10px;opacity:.5;margin-top:-2px}
+.sc-pre .sc-lbl{color:var(--amber)}.sc-pre .sc-num{color:var(--amber)}
+.sc-post .sc-lbl{color:var(--teal)}.sc-post .sc-num{color:var(--teal)}
+.sc-mid{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.sc-delta{font-size:32px;font-weight:900;color:#fff;letter-spacing:-1px}
+.sc-delta-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.sc-right{flex:1;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.lvl{display:inline-block;padding:5px 14px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.5px;white-space:nowrap}
+.lvl-critico{background:rgba(255,80,80,.12);color:#FF6060;border:1px solid rgba(255,80,80,.25)}
+.lvl-progreso{background:rgba(255,159,67,.12);color:var(--amber);border:1px solid rgba(255,159,67,.25)}
+.lvl-optimo{background:rgba(0,201,122,.12);color:var(--teal);border:1px solid rgba(0,201,122,.25)}
+
+/* SECTION */
+.sec-hd{padding:11px 28px;display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+.sec-hd-1{background:rgba(255,159,67,.07);border-left:3px solid var(--amber)}
+.sec-hd-2{background:rgba(0,201,122,.07);border-left:3px solid var(--teal)}
+.sec-name{font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase}
+.sec-hd-1 .sec-name{color:var(--amber)}.sec-hd-2 .sec-name{color:var(--teal)}
+.sec-pts{font-size:11px;font-weight:700;color:var(--txt-muted)}
+
+/* COL HEADERS */
+.col-hds{background:var(--surface);border:1px solid var(--border);border-top:none;display:grid;grid-template-columns:38px 1fr 118px 118px 150px;padding:7px 10px}
+.ch{font-size:8px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--txt-muted);text-align:center}
+.ch.pre{color:var(--amber)}.ch.post{color:var(--teal)}.ch.left{text-align:left}
+
+/* CRITERION */
+.crit{background:var(--surface);border:1px solid var(--border);border-top:none;display:grid;grid-template-columns:38px 1fr 118px 118px 150px;align-items:center;transition:background .1s}
+.crit:last-of-type{border-radius:0 0 var(--r) var(--r)}
+.crit:hover{background:#F7F9FF}
+.badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;margin:10px auto;flex-shrink:0}
+.s1 .badge{background:var(--amber);color:#fff}.s2 .badge{background:var(--teal);color:var(--navy)}
+.ct{padding:10px 12px}
+.ct-title{font-size:12.5px;font-weight:700;color:var(--txt);margin-bottom:2px}
+.ct-how{font-size:10px;color:var(--txt-muted);line-height:1.4}
+.vc{padding:8px 6px;display:flex;gap:4px;justify-content:center}
+.vc.pre-c{background:var(--amber-col)}.vc.post-c{background:var(--teal-col)}
+.vb{padding:4px 8px;border-radius:6px;border:1.5px solid var(--border);background:transparent;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--txt-muted);transition:all .12s}
+.vb:hover{border-color:var(--txt-muted);color:var(--txt)}
+.vb.si.on{background:var(--teal);border-color:var(--teal);color:var(--navy)}
+.vb.no.on{background:#FFE8E8;border-color:#FF6060;color:#CC2020}
+.vb.na.on{background:rgba(122,136,204,.15);border-color:var(--txt-muted);color:var(--txt-muted)}
+.nc{padding:7px 8px}
+.nt{width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:10px;color:var(--txt-body);background:var(--ground);resize:none;font-family:inherit;outline:none;height:36px}
+.nt:focus{border-color:var(--amber);background:var(--surface)}
+
+/* OBSERVATIONS + SIGNATURES */
+.obs{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 28px;margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.obs-lbl{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--txt-muted);margin-bottom:8px}
+.obs-ta{width:100%;height:80px;border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--txt-body);background:var(--ground);resize:vertical;font-family:inherit;outline:none}
+.obs-ta:focus{border-color:var(--amber)}
+.sigs{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 28px;margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px}
+.sig-f{display:flex;flex-direction:column;gap:8px}
+.sig-line{border-bottom:1.5px solid var(--navy);height:44px}
+.sig-lbl{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--txt-muted)}
+
+/* ACTIONS */
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-bottom:14px;align-items:center}
+.save-note{font-size:12px;font-weight:700;opacity:0;transition:opacity .4s;margin-right:auto}
+.btn{padding:10px 24px;border-radius:24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:all .15s}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-navy:hover{background:var(--navy-mid)}
+.btn-save{background:var(--teal);color:var(--navy)}
+.btn-save:disabled{opacity:.5;cursor:not-allowed}
+.footer{text-align:center;font-size:9px;color:var(--txt-muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:20px}
+@media print{.auth-bar,.cfg-block,.actions{display:none}body{background:#fff}.page{padding:0}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- AUTH BAR -->
+  <div class="auth-bar">
+    <div class="auth-status">
+      <div class="auth-dot" id="auth-dot"></div>
+      <span id="auth-label">No iniciada sesión</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-ms" id="btn-signin" onclick="signIn()">
+        <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+        Iniciar sesión con Microsoft
+      </button>
+      <button class="btn-ms" id="btn-signout" onclick="signOut()" style="display:none">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- CONFIG (visible hasta que se configure) -->
+  <div class="cfg-block" id="cfg-block">
+    <div class="cfg-title">⚙ Configuración Azure AD (una sola vez)</div>
+    <div class="cfg-grid">
+      <div class="cfg-field">
+        <label>Client ID</label>
+        <input id="cfg-client" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+      </div>
+      <div class="cfg-field">
+        <label>Tenant ID</label>
+        <input id="cfg-tenant" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+      </div>
+      <div class="cfg-field" style="grid-column:1/-1">
+        <label>File ID (Excel en OneDrive)</label>
+        <input id="cfg-file" type="text" placeholder="01XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX">
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button class="btn btn-navy" style="padding:8px 18px;font-size:12px" onclick="saveCfg()">Guardar configuración</button>
+    </div>
+    <div class="cfg-hint">
+      <strong>Cómo obtener estos valores:</strong><br>
+      1. <a href="https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank">portal.azure.com</a> → Azure AD → Registros de aplicaciones → Nueva → copia <strong>Client ID</strong> y <strong>Tenant ID</strong><br>
+      2. En la app: Permisos API → Agregar → Microsoft Graph → Permisos delegados → <strong>Files.ReadWrite</strong><br>
+      3. URI de redirección: <strong>https://maryorincl-hash.github.io/contactodigital/ms_mystery.html</strong><br>
+      4. El <strong>File ID</strong> se obtiene abriendo el Excel en OneDrive → copiar la URL → el ID está en <code>items/01XXXXX</code>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div><div class="brand-name">AMERICAR</div><div class="brand-sub">Contact Center · Autos Usados</div></div>
+    <div class="hdr-right">
+      <div class="hdr-label">Evaluación de Desempeño</div>
+      <div class="hdr-title">Mystery Shopper<br>Cerrador Digital</div>
+    </div>
+  </div>
+  <div class="strip"></div>
+
+  <!-- META -->
+  <div class="meta">
+    <div class="meta-f"><label>Sucursal</label><input type="text" id="m-suc" placeholder="ej. Concepción"></div>
+    <div class="meta-f"><label>Ejecutivo evaluado</label><input type="text" id="m-eje"></div>
+    <div class="meta-f"><label>Evaluador</label><input type="text" id="m-eva"></div>
+    <div class="meta-f"><label>Fecha PRE capacitación</label><input type="date" id="m-fpre"></div>
+    <div class="meta-f"><label>Fecha POST capacitación</label><input type="date" id="m-fpost"></div>
+    <div class="meta-f"><label>Lead simulado / ID Llaima</label><input type="text" id="m-lead"></div>
+  </div>
+
+  <!-- SCORE BAR -->
+  <div class="score-bar">
+    <div class="sc-block sc-pre"><div class="sc-lbl">Pre</div><div class="sc-num" id="pre-t">0</div><div class="sc-of">/10</div></div>
+    <div class="sc-mid"><div class="sc-delta" id="delta">+0</div><div class="sc-delta-lbl">mejora post capacitación</div></div>
+    <div class="sc-block sc-post"><div class="sc-lbl">Post</div><div class="sc-num" id="post-t">0</div><div class="sc-of">/10</div></div>
+    <div class="sc-right">
+      <div id="pre-lvl" class="lvl lvl-critico">PRE: Crítico ❌</div>
+      <div id="post-lvl" class="lvl lvl-critico">POST: Crítico ❌</div>
+    </div>
+  </div>
+
+  <!-- ACCIONES -->
+  <div class="actions" style="margin-top:16px">
+    <span class="save-note" id="save-note"></span>
+    <button class="btn btn-navy" onclick="window.print()">🖨 Imprimir</button>
+    <button class="btn btn-save" id="btn-save" onclick="saveResult()" disabled>💾 Guardar en Excel</button>
+  </div>
+
+  <!-- SECCIÓN 1 -->
+  <div class="sec-hd sec-hd-1">
+    <div class="sec-name">📞 Contacto Inicial</div>
+    <div class="sec-pts">PRE: <strong id="s1p">0</strong> · POST: <strong id="s1q">0</strong> / 5 pts</div>
+  </div>
+  <div class="col-hds">
+    <div class="ch"></div><div class="ch left">Criterio · Cómo verificar</div>
+    <div class="ch pre">PRE</div><div class="ch post">POST</div><div class="ch left">Notas</div>
+  </div>
+  <div id="s1-rows"></div>
+
+  <!-- SECCIÓN 2 -->
+  <div class="sec-hd sec-hd-2">
+    <div class="sec-name">📋 Cita, CRM y Seguimiento</div>
+    <div class="sec-pts">PRE: <strong id="s2p">0</strong> · POST: <strong id="s2q">0</strong> / 5 pts</div>
+  </div>
+  <div class="col-hds">
+    <div class="ch"></div><div class="ch left">Criterio · Cómo verificar</div>
+    <div class="ch pre">PRE</div><div class="ch post">POST</div><div class="ch left">Notas</div>
+  </div>
+  <div id="s2-rows"></div>
+
+  <!-- OBSERVACIONES -->
+  <div class="obs">
+    <div><div class="obs-lbl">Observaciones generales</div><textarea class="obs-ta" id="obs-gen" placeholder="Contexto de la evaluación, comportamientos destacados…"></textarea></div>
+    <div><div class="obs-lbl">Compromisos post-evaluación</div><textarea class="obs-ta" id="obs-comp" placeholder="Acciones correctivas acordadas, fecha próxima evaluación…"></textarea></div>
+  </div>
+
+  <!-- FIRMAS -->
+  <div class="sigs">
+    <div class="sig-f"><div class="sig-line"></div><div class="sig-lbl">Evaluador</div></div>
+    <div class="sig-f"><div class="sig-line"></div><div class="sig-lbl">Ejecutivo evaluado</div></div>
+    <div class="sig-f"><div class="sig-line"></div><div class="sig-lbl">Jefe de sucursal</div></div>
+  </div>
+  <div class="footer">Americar · Mystery Shopper · Cerrador Digital · 2026</div>
+</div>
+
+<script>
+// ── CRITERIOS ─────────────────────────────────────────────────────────────────
+const CRITERIOS=[
+  {s:1,label:'Llamada en menos de 5 minutos',how:'Timestamp lead Llaima vs. registro de llamada saliente'},
+  {s:1,label:'WhatsApp enviado si no contesta',how:'Historial WhatsApp · mensaje breve que genera curiosidad'},
+  {s:1,label:'Reintento desde WhatsApp a los 2 minutos',how:'Registro de llamada WhatsApp · ≈ 2 min después del mensaje'},
+  {s:1,label:'Mapeo de VPP, crédito y seguro',how:'Grabación de llamada · los 3 intangibles preguntados'},
+  {s:1,label:'Propuesta de cita con día y hora fijos',how:'Grabación · pregunta de control usada · escasez mencionada'},
+  {s:2,label:'Invitación de calendario Outlook enviada',how:'Calendario Outlook · invitación con recordatorio activo'},
+  {s:2,label:'Confirmación de cita 24h antes por WhatsApp',how:'Historial WhatsApp · mensaje el día anterior · personalizado'},
+  {s:2,label:'Registro como Oportunidad en Llaima',how:'CRM Llaima · si hay cotización, simulación o tasación VPP'},
+  {s:2,label:'Reagendamiento en 24h si no-show',how:'Llaima · nuevo intento registrado · máx. 6 intentos activo'},
+  {s:2,label:'Registro completo en Llaima al cierre del día',how:'Llaima · etapa, intangibles auditados, próxima acción'}
+];
+
+// Build rows
+function buildRows(){
+  ['s1-rows','s2-rows'].forEach(id=>document.getElementById(id).innerHTML='');
+  CRITERIOS.forEach((c,i)=>{
+    const n=i+1;
+    const div=document.createElement('div');
+    div.className=`crit s${c.s}`;
+    div.innerHTML=`
+      <div class="badge">${n}</div>
+      <div class="ct"><div class="ct-title">${c.label}</div><div class="ct-how">${c.how}</div></div>
+      <div class="vc pre-c">
+        <button class="vb si" onclick="vote(this,${n},'pre','si')">Sí</button>
+        <button class="vb no" onclick="vote(this,${n},'pre','no')">No</button>
+        <button class="vb na" onclick="vote(this,${n},'pre','na')">N/A</button>
+      </div>
+      <div class="vc post-c">
+        <button class="vb si" onclick="vote(this,${n},'post','si')">Sí</button>
+        <button class="vb no" onclick="vote(this,${n},'post','no')">No</button>
+        <button class="vb na" onclick="vote(this,${n},'post','na')">N/A</button>
+      </div>
+      <div class="nc"><textarea class="nt" id="nt-${n}" placeholder="Observación…"></textarea></div>`;
+    document.getElementById(`s${c.s}-rows`).appendChild(div);
+  });
+}
+buildRows();
+
+// ── SCORING ───────────────────────────────────────────────────────────────────
+const sc={};
+for(let i=1;i<=10;i++) sc[i]={pre:null,post:null};
+
+function vote(btn,crit,period,val){
+  btn.closest('.vc').querySelectorAll('.vb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  sc[crit][period]=val==='si'?1:val==='na'?null:0;
+  update();
+}
+
+function lvlInfo(n,tag){
+  if(n>=9) return['lvl-optimo',tag+': Óptimo ✅'];
+  if(n>=6) return['lvl-progreso',tag+': En Formación ⚠️'];
+  return['lvl-critico',tag+': Crítico ❌'];
+}
+
+function update(){
+  let pre=0,post=0,s1p=0,s1q=0,s2p=0,s2q=0;
+  for(let i=1;i<=10;i++){
+    if(sc[i].pre===1){pre++;i<=5?s1p++:s2p++;}
+    if(sc[i].post===1){post++;i<=5?s1q++:s2q++;}
+  }
+  document.getElementById('pre-t').textContent=pre;
+  document.getElementById('post-t').textContent=post;
+  document.getElementById('delta').textContent=(post-pre>=0?'+':'')+(post-pre);
+  document.getElementById('s1p').textContent=s1p;document.getElementById('s1q').textContent=s1q;
+  document.getElementById('s2p').textContent=s2p;document.getElementById('s2q').textContent=s2q;
+  const[pc,pt]=lvlInfo(pre,'PRE');const[qc,qt]=lvlInfo(post,'POST');
+  const pe=document.getElementById('pre-lvl');pe.className='lvl '+pc;pe.textContent=pt;
+  const qe=document.getElementById('post-lvl');qe.className='lvl '+qc;qe.textContent=qt;
+}
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+function saveCfg(){
+  localStorage.setItem('az_client',document.getElementById('cfg-client').value.trim());
+  localStorage.setItem('az_tenant',document.getElementById('cfg-tenant').value.trim());
+  localStorage.setItem('az_file',document.getElementById('cfg-file').value.trim());
+  notify('Configuración guardada — inicia sesión con Microsoft');
+  document.getElementById('cfg-block').style.display='none';
+}
+
+// ── MSAL ──────────────────────────────────────────────────────────────────────
+let msalApp=null;
+const SCOPES=['Files.ReadWrite'];
+
+function initMsal(){
+  const clientId=localStorage.getItem('az_client')||'';
+  const tenantId=localStorage.getItem('az_tenant')||'';
+  if(!clientId||!tenantId) return false;
+  msalApp=new msal.PublicClientApplication({
+    auth:{clientId,authority:`https://login.microsoftonline.com/${tenantId}`,redirectUri:window.location.href},
+    cache:{cacheLocation:'localStorage',storeAuthStateInCookie:false}
+  });
+  return true;
+}
+
+async function signIn(){
+  if(!initMsal()){
+    notify('Completa primero la configuración Azure AD','warn');
+    document.getElementById('cfg-block').style.display='block';
+    return;
+  }
+  try{
+    const r=await msalApp.loginPopup({scopes:SCOPES});
+    setAuthUI(r.account);
+  }catch(e){notify('Error de inicio de sesión: '+e.message,'err');}
+}
+
+function signOut(){
+  if(msalApp) msalApp.logoutPopup();
+  setAuthUI(null);
+}
+
+function setAuthUI(account){
+  const dot=document.getElementById('auth-dot');
+  const lbl=document.getElementById('auth-label');
+  const btnIn=document.getElementById('btn-signin');
+  const btnOut=document.getElementById('btn-signout');
+  const btnSave=document.getElementById('btn-save');
+  if(account){
+    dot.className='auth-dot ok';
+    lbl.textContent='Conectado como '+account.username;
+    btnIn.style.display='none';
+    btnOut.style.display='';
+    btnSave.disabled=false;
+    document.getElementById('cfg-block').style.display='none';
+  } else {
+    dot.className='auth-dot err';
+    lbl.textContent='No iniciada sesión';
+    btnIn.style.display='';
+    btnOut.style.display='none';
+    btnSave.disabled=true;
+  }
+}
+
+async function getToken(){
+  const accounts=msalApp.getAllAccounts();
+  if(!accounts.length) throw new Error('No hay sesión activa');
+  try{
+    const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});
+    return r.accessToken;
+  }catch{
+    const r=await msalApp.acquireTokenPopup({scopes:SCOPES});
+    return r.accessToken;
+  }
+}
+
+// ── SAVE TO EXCEL ─────────────────────────────────────────────────────────────
+async function saveResult(){
+  const suc=document.getElementById('m-suc').value.trim();
+  const eje=document.getElementById('m-eje').value.trim();
+  if(!suc||!eje){notify('Completa Sucursal y Ejecutivo','warn');return;}
+
+  const pre=parseInt(document.getElementById('pre-t').textContent)||0;
+  const post=parseInt(document.getElementById('post-t').textContent)||0;
+  const notas=[];
+  for(let i=1;i<=10;i++) notas.push(document.getElementById('nt-'+i)?.value||'');
+
+  const row=[
+    Date.now().toString(36),
+    suc,eje,
+    document.getElementById('m-eva').value.trim(),
+    document.getElementById('m-fpre').value,
+    document.getElementById('m-fpost').value,
+    document.getElementById('m-lead').value.trim(),
+    pre,post,post-pre,
+    parseInt(document.getElementById('s1p').textContent)||0,
+    parseInt(document.getElementById('s1q').textContent)||0,
+    parseInt(document.getElementById('s2p').textContent)||0,
+    parseInt(document.getElementById('s2q').textContent)||0,
+    JSON.stringify(sc),
+    JSON.stringify(notas),
+    document.getElementById('obs-gen').value,
+    document.getElementById('obs-comp').value,
+    new Date().toISOString()
+  ];
+
+  notify('Guardando en Excel…');
+  try{
+    const token=await getToken();
+    const fileId=localStorage.getItem('az_file')||'';
+    const res=await fetch(
+      `https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/workbook/tables/Evaluaciones/rows`,
+      {method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+       body:JSON.stringify({values:[row]})}
+    );
+    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||res.status);}
+    notify('✅ Evaluación guardada en Excel OneDrive — el panel se actualizará');
+  }catch(e){notify('Error: '+e.message,'err');}
+}
+
+// ── NOTIFY ────────────────────────────────────────────────────────────────────
+function notify(msg,type){
+  const n=document.getElementById('save-note');
+  n.textContent=msg;
+  n.style.color=type==='err'?'#FF6060':type==='warn'?'var(--amber)':'var(--teal)';
+  n.style.opacity='1';
+  setTimeout(()=>n.style.opacity='0',4000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  const clientId=localStorage.getItem('az_client')||'';
+  const tenantId=localStorage.getItem('az_tenant')||'';
+  const fileId=localStorage.getItem('az_file')||'';
+  if(clientId) document.getElementById('cfg-client').value=clientId;
+  if(tenantId) document.getElementById('cfg-tenant').value=tenantId;
+  if(fileId) document.getElementById('cfg-file').value=fileId;
+  if(clientId&&tenantId&&fileId) document.getElementById('cfg-block').style.display='none';
+  if(initMsal()){
+    const accounts=msalApp.getAllAccounts();
+    if(accounts.length) setAuthUI(accounts[0]);
+  }
+});
+</script>
+</body>
+</html>
